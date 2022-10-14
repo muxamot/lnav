@@ -1,0 +1,70 @@
+{
+    "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+    "ds_log": {
+        "title": "syslog -> glog",
+        "description": "glog thru syslog",
+        "url": "https://code.google.com/p/google-glog/",
+        "regex": {
+            "std": {
+                "pattern": "^((?:\\S{3,8}\\s+\\d{1,2} \\d{2}:\\d{2}:\\d{2}|\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3,6})?(?:Z|(?:\\+|-)\\d{2}:\\d{2})))(?: (?<log_hostname>[a-zA-Z0-9:][^ ]+[a-zA-Z0-9]))?(?: \\[CLOUDINIT\\])?(?:(?: syslogd [\\d\\.]+|(?: (?<log_syslog_tag>(?<log_procname>(?:[^\\[: ]+|[^ :]+))(?:\\[(?<log_pid>\\d+)\\](?: \\([^\\)]+\\))?)?))):) (?<level>[IWECF])(?<timestamp>\\d{4} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}) +(?<thread>\\d+) (?<src_file>[^:]+):(?<src_line>\\d+)\\] (?<body>.*)"
+            }
+        },
+        "level-field": "level",
+        "level": {
+            "error": "E",
+            "warning": "W",
+            "info": "I",
+            "critical": "C",
+            "fatal": "F"
+        },
+        "opid-field": "thread",
+        "multiline": true,
+        "value": {
+            "log_hostname": {
+                "kind": "string",
+                "collate": "ipaddress",
+                "identifier": true,
+                "description": "The name of the host that generated the message"
+            },
+            "log_procname": {
+                "kind": "string",
+                "identifier": true,
+                "description": "The name of the process that generated the message"
+            },
+            "log_pid": {
+                "kind": "string",
+                "identifier": true,
+                "action-list": [
+                    "dump_pid"
+                ],
+                "description": "The ID of the process that generated the message"
+            },
+            "log_syslog_tag": {
+                "kind": "string",
+                "identifier": true,
+                "description": "The combination of the procname and pid"
+            },
+            "thread": {
+                "kind": "integer",
+                "identifier": true,
+                "foreign-key": true
+            },
+            "src_file": {
+                "kind": "string",
+                "identifier": true
+            },
+            "src_line": {
+                "kind": "integer",
+                "foreign-key": true
+            }
+        },
+        "sample": [
+            {
+                "line": "2022-10-12T10:00:05.118120+00:00 node-00 ds[1111]: I1012 10:00:05.117758  6208 some_sample_file.hpp:211] some log text body"
+            },
+            {
+                "line": "2022-10-12T10:00:05.118120+00:00 sp-01 ds[6093]: E1012 10:00:05.117758  6208 some_another_sample.cpp:211] lorem ipsum"
+            }
+        ]
+    }
+}
